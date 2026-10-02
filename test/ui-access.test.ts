@@ -21,10 +21,27 @@ test('provider auth exposes provider registration and customer switch', () => {
 
 test('provider page and frontend assets use the current version', () => {
   assert.ok(provider.includes('data-page="provider"'));
-  assert.ok(provider.includes('app.js?v=56')); 
-  assert.ok(index.includes('app.js?v=56')); 
+  assert.ok(provider.includes('app.js?v=57')); 
+  assert.ok(index.includes('app.js?v=57')); 
 });
 
+
+
+
+test('V57 motorbike trips are wired into the customer UI and cache version', () => {
+  for (const slug of ['motorbike-passenger-trip','motorbike-item-delivery','motorbike-buy-item','motorbike-buy-medicine','motorbike-restaurant-pickup','motorbike-document-delivery','motorbike-technician-pickup','motorbike-store-shopping','motorbike-small-load','motorbike-home-pickup','motorbike-other']) assert.ok(app.includes(slug));
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  assert.ok(sw.includes("khadamat-shell-v57"));
+  assert.ok(sw.includes("u.pathname.endsWith('/js/app.js')"));
+});
+
+test('V57 migration uses the real transport category id', () => {
+  const migration = fs.readFileSync(path.join(root, '..', '..', 'src', 'db', 'migrations', '004_trips.sql'), 'utf8');
+  const repair = fs.readFileSync(path.join(root, '..', '..', 'src', 'db', 'migrations', '005_trips_repair.sql'), 'utf8');
+  assert.ok(migration.includes("SELECT 'cat-motorbike-trips',id,'motorbike-trips'"));
+  assert.ok(repair.includes("UPDATE categories"));
+  assert.ok(repair.includes("slug='motorbike-trips'"));
+});
 
 test('provider order action is not nested inside the clickable order detail button', () => {
   assert.match(app, /class=\"order-card-main\"/);

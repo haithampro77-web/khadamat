@@ -20,12 +20,16 @@ export async function seedBase(db: Db, config: Config) {
     // الإعدادات الافتراضية تُكتب في القاعدة لتظهر وتُعدَّل من اللوحة (لا تُستبدل إن كانت موجودة)
     for (const [key, m] of Object.entries(SETTINGS)) db.run('INSERT OR IGNORE INTO system_settings(key,value,description,updated_at) VALUES (?,?,?,?)', key, j(m.def), m.desc, now);
     CATEGORIES.forEach((c, ci) => {
-      let cat = db.get('SELECT id FROM categories WHERE slug = ?', c.slug);
+      let cat = db.get<{id:string; parent_id:string|null}>('SELECT id,parent_id FROM categories WHERE slug = ?', c.slug);
+      const expectedParentId = (c as any).parentSlug ? db.get<{id:string}>('SELECT id FROM categories WHERE slug=?',(c as any).parentSlug)?.id ?? null : null;
       if (!cat) {
-        cat = { id: uuid() };
-        const parentId = (c as any).parentSlug ? db.get<{id:string}>('SELECT id FROM categories WHERE slug=?',(c as any).parentSlug)?.id ?? null : null;
-        db.run('INSERT INTO categories(id,parent_id,slug,name_i18n,icon,keywords,sort_order,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)', cat.id, parentId, c.slug, j(c.name), c.icon, j(c.keywords), ci + 1, now, now);
+        cat = { id: uuid(), parent_id: expectedParentId };
+        db.run('INSERT INTO categories(id,parent_id,slug,name_i18n,icon,keywords,sort_order,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)', cat.id, expectedParentId, c.slug, j(c.name), c.icon, j(c.keywords), ci + 1, now, now);
         out.categories++;
+      } else if ((c as any).parentSlug && expectedParentId && cat.parent_id !== expectedParentId) {
+        // Repair an existing V57 category that was created with the wrong parent.
+        db.run('UPDATE categories SET parent_id=?,is_active=1,updated_at=? WHERE id=?', expectedParentId, now, cat.id);
+        cat = { ...cat, parent_id: expectedParentId };
       }
       c.services.forEach((sv, si) => {
         if (db.get('SELECT 1 FROM services WHERE slug = ?', sv.slug)) return;

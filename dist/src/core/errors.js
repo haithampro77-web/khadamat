@@ -17,7 +17,6 @@ export const E = {
     notFound: (m = 'العنصر المطلوب غير موجود', code = 'NOT_FOUND') => new AppError(404, code, m),
     conflict: (m, code = 'CONFLICT') => new AppError(409, code, m),
     unprocessable: (m, code = 'UNPROCESSABLE', d) => new AppError(422, code, m, d),
-    serviceUnavailable: (m = 'الخدمة غير متاحة حاليًا', code = 'SERVICE_UNAVAILABLE') => new AppError(503, code, m),
     tooMany: (retryAfterSec = 60) => {
         const e = new AppError(429, 'RATE_LIMITED', 'محاولات كثيرة، يرجى المحاولة لاحقًا');
         e.retryAfter = retryAfterSec;

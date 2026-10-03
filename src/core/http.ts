@@ -118,9 +118,7 @@ function serveStatic(config: StaticConfig, urlPath: string, res: ServerResponse,
   if (!file.startsWith(base + path.sep) && file !== base) return false; // منع Path Traversal
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return false;
   const ext = path.extname(file).toLowerCase();
-  const stat = fs.statSync(file);
-  const cacheControl = ext === '.html' ? 'no-cache' : 'public, max-age=3600, stale-while-revalidate=86400';
-  res.writeHead(200, { ...headers, 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': cacheControl, 'Content-Length': String(stat.size), 'Last-Modified': stat.mtime.toUTCString() });
+  res.writeHead(200, { ...headers, 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=300' });
   fs.createReadStream(file).pipe(res);
   return true;
 }

@@ -24,7 +24,7 @@ export interface Db {
 export function openDb(file: string): Db {
   if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });
   const raw = new DatabaseSync(file);
-  raw.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 15000; PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY; PRAGMA cache_size = -20000; PRAGMA wal_autocheckpoint = 1000;');
+  raw.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000; PRAGMA synchronous = NORMAL;');
   const cache = new Map<string, ReturnType<DatabaseSync['prepare']>>();
   const stmt = (sql: string) => {
     let s = cache.get(sql);

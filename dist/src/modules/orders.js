@@ -6,7 +6,6 @@ import { auth, roles } from './auth.middleware.js';
 import { locationSchema } from './locations.js';
 import { validateFormData } from './catalog.js';
 import { canTransition, CANCELLABLE_ORDER, statusIndex } from '../../shared/orderStateMachine.js';
-import { serializeTrip } from './trips.js';
 const createOrderSchema = s.obj({
     serviceId: s.str({ min: 1, max: 64 }),
     description: s.str({ min: 5, max: 1000 }),
@@ -55,9 +54,6 @@ export function createOrders(app) {
                 const cu = db.get('SELECT id, full_name, phone FROM users WHERE id = ?', o.customer_id);
                 out.customer = { id: cu.id, fullName: cu.full_name, phone: approx ? null : cu.phone };
             }
-            const trip = serializeTrip(app, o.id, ctx.locale);
-            if (trip)
-                out.trip = trip;
             if (o.provider_id) {
                 const p = app.providers.summary(o.provider_id, ctx.locale);
                 out.provider = { id: p.id, displayName: p.displayName, avatarUrl: p.avatarUrl, rating: p.rating.avg };

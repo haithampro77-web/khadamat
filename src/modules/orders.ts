@@ -9,6 +9,7 @@ import { canTransition, CANCELLABLE_ORDER, statusIndex } from '../../shared/orde
 import type { App } from '../app.js';
 import type { Ctx, Router } from '../core/http.js';
 import type { OrderRow, OrderStatus, Priority, ActorRole, LocationRow } from '../types/domain.js';
+import { serializeTrip } from './trips.js';
 
 export interface CreateOrderInput {
   serviceId: string; description: string; location: LocationInput; addressId?: string; contactPhone: string;
@@ -34,6 +35,7 @@ export interface OrderOut {
   paymentMethod: string; notes: string | null; attachments: string[]; wave: number; customer?: { id: string; fullName: string; phone: string | null };
   provider?: { id: string; displayName: string; avatarUrl: string | null; rating: number } | null;
   createdAt: string; acceptedAt: string | null; startedAt: string | null; completedAt: string | null; cancelledAt: string | null; cancelReason: string | null;
+  trip?: ReturnType<typeof serializeTrip>;
 }
 
 export interface Orders {
@@ -76,6 +78,8 @@ export function createOrders(app: App): Orders {
         const cu = db.get<{ id: string; full_name: string; phone: string }>('SELECT id, full_name, phone FROM users WHERE id = ?', o.customer_id)!;
         out.customer = { id: cu.id, fullName: cu.full_name, phone: approx ? null : cu.phone };
       }
+      const trip = serializeTrip(app, o.id, ctx.locale);
+      if (trip) out.trip = trip;
       if (o.provider_id) {
         const p = app.providers.summary(o.provider_id, ctx.locale);
         out.provider = { id: p.id, displayName: p.displayName, avatarUrl: p.avatarUrl, rating: p.rating.avg };

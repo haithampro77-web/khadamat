@@ -23,7 +23,7 @@ export interface AdminSeed { name: string; phone: string; email: string; passwor
 export interface Config {
   env: string; isProd: boolean; port: number; dbPath: string; uploadDir: string; jwtSecret: string;
   accessTtlSec: number; refreshTtlDays: number; cookieSecure: boolean; trustProxy: boolean; corsOrigins: string[];
-  mapProvider: string; assignmentTickMs: number; logLevel: string; disableScheduler: boolean; disableRateLimit: boolean;
+  mapProvider: string; routingUrl: string; routingTimeoutMs: number; assignmentTickMs: number; logLevel: string; disableScheduler: boolean; disableRateLimit: boolean;
   admin: AdminSeed; publicDir: string; sharedDir: string; root: string;
 }
 export interface ConfigOverrides { [key: string]: string | boolean | undefined; __skipDotEnv?: boolean }
@@ -55,6 +55,8 @@ export function loadConfig(overrides: ConfigOverrides = {}): Config {
     trustProxy: bool(env.TRUST_PROXY, false),
     corsOrigins: (env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean),
     mapProvider: env.MAP_PROVIDER || 'leaflet-osm',
+    routingUrl: env.ROUTING_URL || 'https://router.project-osrm.org',
+    routingTimeoutMs: int(env.ROUTING_TIMEOUT_MS, 8000),
     assignmentTickMs: int(env.ASSIGNMENT_TICK_MS, 15000),
     logLevel: env.LOG_LEVEL || 'info',
     disableScheduler: bool(env.DISABLE_SCHEDULER, false),
@@ -63,7 +65,7 @@ export function loadConfig(overrides: ConfigOverrides = {}): Config {
       name: env.ADMIN_NAME || 'مدير النظام',
       phone: env.ADMIN_PHONE || '+967700000000',
       email: env.ADMIN_EMAIL || 'admin@khadamat.local',
-      password: env.ADMIN_PASSWORD || 'Khdamat@Admin2026!',
+      password: env.ADMIN_PASSWORD || 'Khadamat@Admin2026!',
     },
     publicDir: path.join(ROOT, 'public'),
     sharedDir: path.join(ROOT, 'shared'),

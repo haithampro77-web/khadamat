@@ -27,6 +27,7 @@ import { registerQuoteRoutes } from './modules/quotes.js';
 import { registerRatingRoutes } from './modules/ratings.js';
 import { registerComplaintRoutes } from './modules/complaints.js';
 import { registerChatRoutes } from './modules/chat.js';
+import { registerTripRoutes } from './modules/trips.js';
 import { createScheduler } from './modules/scheduler.js';
 import { CashPayment } from './ports/payment.js';
 export function createApp(overrides = {}) {
@@ -69,6 +70,7 @@ export function createApp(overrides = {}) {
     registerRatingRoutes(app, r);
     registerComplaintRoutes(app, r);
     registerChatRoutes(app, r);
+    registerTripRoutes(app, r);
     app.server = http.createServer(createRequestHandler(app));
     app.server.requestTimeout = 30_000;
     app.server.headersTimeout = 15_000;

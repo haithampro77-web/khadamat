@@ -5,7 +5,7 @@ import { createApp } from '../src/app.js';
 import { seedBase } from '../src/db/seed.js';
 export async function startApp(extra = {}) {
     const uploadDir = fs.mkdtempSync(path.join(os.tmpdir(), 'khadamat-test-'));
-    const app = createApp({ DB_PATH: ':memory:', UPLOAD_DIR: uploadDir, LOG_LEVEL: 'silent', JWT_SECRET: 'test-secret-test-secret-test-secret-1234', DISABLE_SCHEDULER: 'true', DISABLE_RATE_LIMIT: 'true',
+    const app = createApp({ DB_PATH: ':memory:', UPLOAD_DIR: uploadDir, LOG_LEVEL: 'silent', JWT_SECRET: 'test-secret-test-secret-test-secret-1234', DISABLE_SCHEDULER: 'true', DISABLE_RATE_LIMIT: 'true', ROUTING_URL: 'mock://straight-line',
         ADMIN_PHONE: '+967700000000', ADMIN_EMAIL: 'admin@test.local', ADMIN_PASSWORD: 'AdminPass123', __skipDotEnv: true, ...extra });
     await seedBase(app.db, app.config);
     await new Promise((res) => { app.server.listen(0, '127.0.0.1', res); });
